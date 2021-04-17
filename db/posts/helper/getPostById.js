@@ -8,7 +8,7 @@ async function getPostById(postId) {
       WHERE id=$1;
     `, [postId]);
 
-    const { rows: tags } = await client.query(`
+    const { rows: [tags] } = await client.query(`
       SELECT tags.*
       FROM tags
       JOIN post_tags ON tags.id=post_tags."tagId"

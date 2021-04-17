@@ -3,7 +3,7 @@ const getPostById = require("./helper/getPostById.js")
 
 async function getPostsByUser(userId) {
   try {
-    const { rows: postIds } = await client.query(`
+    const { rows: postIds } = await client.query(/*sql*/`
       SELECT * 
       FROM posts
       WHERE "authorId"=${userId};
