@@ -3,6 +3,7 @@ const updateUser = require("./users/updateUser.js")
 const getAllPosts = require("./posts/getAllPosts.js")
 const updatePost = require("./posts/updatePost.js")
 const getUserById = require("./users/getUserById.js")
+const getPostsByTagName = require("./posts/getPostsByTagName.js")
 
 async function testDB() {
   try {
@@ -33,6 +34,16 @@ async function testDB() {
     console.log("Calling getUserById with 1");
     const albert = await getUserById(1);
     console.log("Result:", JSON.stringify(albert, null, 4));
+
+    console.log("Calling updatePost on posts[1], only updating tags");
+    const updatePostTagsResult = await updatePost(posts[1].id, {
+      tags: ["#youcandoanything", "#redfish", "#bluefish"]
+    });
+    console.log("Result:", updatePostTagsResult);
+
+    console.log("Calling getPostsByTagName with #happy");
+    const postsWithHappy = await getPostsByTagName("#happy");
+    console.log("Result:", postsWithHappy);
 
     console.log("Finished database tests!");
   } catch (error) {
