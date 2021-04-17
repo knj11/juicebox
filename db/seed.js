@@ -1,21 +1,25 @@
-const {  
-  client,
-  createUser,
-  updateUser,
-  getAllUsers,
-  getUserById,
-  createPost,
-  updatePost,
-  getAllPosts,
-  getPostsByUser
-} = require('./index');
+const client = require("./client.js");
+//User Functions
+const createUser = require("./users/createUser.js")
+const getAllUsers = require("./users/getAllUsers.js")
+const getUserById = require("./users/getUserById.js")
+const updateUser = require("./users/updateUser.js")
+//Post Functions
+const addTagsToPost = require("./posts/addTagsToPost.js")
+const createPost = require("./posts/createPost.js")
+const createTags = require("./posts/createTags.js")
+const getAllPosts = require("./posts/getAllPosts.js")
+//const getPostsByUser = require("./posts/getPostsByUser.js")
+const updatePost = require("./posts/updatePost.js")
 
 async function dropTables() {
   try {
     console.log("Starting to drop tables...");
 
     // have to make sure to drop in correct order
-    await client.query(`
+    await client.query(/*sql*/`
+      DROP TABLE IF EXISTS post_tags;
+      DROP TABLE IF EXISTS tags;
       DROP TABLE IF EXISTS posts;
       DROP TABLE IF EXISTS users;
     `);
@@ -31,7 +35,7 @@ async function createTables() {
   try {
     console.log("Starting to build tables...");
 
-    await client.query(`
+    await client.query(/*sql*/`
       CREATE TABLE users (
         id SERIAL PRIMARY KEY,
         username varchar(255) UNIQUE NOT NULL,
@@ -46,6 +50,15 @@ async function createTables() {
         title varchar(255) NOT NULL,
         content TEXT NOT NULL,
         active BOOLEAN DEFAULT true
+      );
+      CREATE TABLE tags (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) UNIQUE NOT NULL
+      );
+      CREATE TABLE post_tags (
+        "postId" INTEGER REFERENCES posts(id),
+        "tagId" INTEGER REFERENCES tags(id),
+        UNIQUE ("postId", "tagId")
       );
     `);
 
@@ -115,6 +128,37 @@ async function createInitialPosts() {
   }
 }
 
+async function createInitialTags() {
+  try {
+    console.log("Starting to create tags...");
+
+    const [happy, sad, inspo, catman] = await createTags([
+      '#happy', 
+      '#worst-day-ever', 
+      '#youcandoanything',
+      '#catmandoeverything'
+    ]);
+    console.log("Finiahed creating tags....")
+    console.log("attempting to get all posts...")
+
+    const [postOne, postTwo, postThree] = await getAllPosts();
+
+    console.log("got all posts....")
+    console.log(happy)
+
+    console.log("attempting to add tags to posts...")
+
+    await addTagsToPost(postOne.id, [happy, inspo]);
+    await addTagsToPost(postTwo.id, [sad, inspo]);
+    await addTagsToPost(postThree.id, [happy, catman, inspo]);
+
+    console.log("Finished creating tags!");
+  } catch (error) {
+    console.log("Error creating tags!");
+    throw error;
+  }
+}
+
 async function rebuildDB() {
   try {
     client.connect();
@@ -123,6 +167,7 @@ async function rebuildDB() {
     await createTables();
     await createInitialUsers();
     await createInitialPosts();
+    await createInitialTags();
   } catch (error) {
     console.log("Error during rebuildDB")
     throw error;
