@@ -1,5 +1,5 @@
 const client = require("../client.js");
-const getPostsByUser = require("../posts/getPostsByUser.js");
+const getPostsByUser = require("../posts/getPostsByUser");
 
 async function getUserById(userId) {
   try {
