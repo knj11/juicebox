@@ -1,5 +1,6 @@
 // api/users.js
 const express = require('express');
+const jwt = require('jsonwebtoken')
 const getAllUsers = require('../db/users/getAllUsers.js');
 const getUserByUsername = require('../db/users/getUserByUsername.js');
 
@@ -37,7 +38,8 @@ usersRouter.post('/login', async (req, res, next) => {
 
     if (user && user.password == password) {
       // create token & return to user
-      res.send({ message: "you're logged in!" });
+      const clientToken = jwt.sign({username: user, password: user,password}, process.env.JWT_SECRET)
+      res.send({ message: "you're logged in!", token: clientToken });
     } else {
       next({ 
         name: 'IncorrectCredentialsError', 
