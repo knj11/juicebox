@@ -5,7 +5,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed:dev": "nodemon ./db/seed.js",
-    "start:dev": "nodemon index.js"
+    "start:dev": "nodemon index.js",
+    "boot:db": "sudo service postgresql start"
   },
   "keywords": [],
   "author": "",
