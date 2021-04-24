@@ -3,6 +3,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken')
 const getAllUsers = require('../db/users/getAllUsers.js');
 const getUserByUsername = require('../db/users/getUserByUsername.js');
+const createUser = require('../db/users/createUser')
 
 const usersRouter = express.Router();
 
@@ -38,7 +39,8 @@ usersRouter.post('/login', async (req, res, next) => {
 
     if (user && user.password == password) {
       // create token & return to user
-      const clientToken = jwt.sign({username: user, password: user,password}, process.env.JWT_SECRET)
+      const {id, username} = user
+      const clientToken = jwt.sign({id, username}, process.env.JWT_SECRET)
       res.send({ message: "you're logged in!", token: clientToken });
     } else {
       next({ 
@@ -50,6 +52,42 @@ usersRouter.post('/login', async (req, res, next) => {
     console.log(error);
     next(error);
   }
+});
+
+usersRouter.post('/register', async (req, res, next) => {
+  const { username, password, name, location } = req.body;
+
+  try {
+    const _user = await getUserByUsername(username);
+
+    if (_user) {
+      next({
+        name: 'UserExistsError',
+        message: 'A user by that username already exists'
+      });
+    }
+
+    const user = await createUser({
+      username,
+      password,
+      name,
+      location,
+    });
+
+    const token = jwt.sign({ 
+      id: user.id, 
+      username
+    }, process.env.JWT_SECRET, {
+      expiresIn: '1w'
+    });
+
+    res.send({ 
+      message: "thank you for signing up",
+      token 
+    });
+  } catch ({ name, message }) {
+    next({ name, message })
+  } 
 });
 
 module.exports = usersRouter;
