@@ -3,7 +3,7 @@ const { Router } = require('express');
 const apiRouter = Router()
 
 const jwt = require('jsonwebtoken');
-const { getUserById } = require('../db/users/getUserById');
+const getUserById = require('../db/users/getUserById');
 const { JWT_SECRET } = process.env;
 
 // set `req.user` if possible
@@ -18,7 +18,7 @@ apiRouter.use(async (req, res, next) => {
 
     try {
       const { id } = jwt.verify(token, JWT_SECRET);
-
+      
       if (id) {
         req.user = await getUserById(id);
         next();
@@ -32,6 +32,14 @@ apiRouter.use(async (req, res, next) => {
       message: `Authorization token must start with ${prefix}`
     });
   }
+});
+
+apiRouter.use((req, res, next) => {
+  if (req.user) {
+    console.log("User is set:", req.user);
+  }
+
+  next();
 });
 
 // Attach routers below here
